@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path("", views.getRoutes, name="routes"),
+    path("register/", views.register, name="register"),
     path("entries/", views.getDiaryEntries, name="entries"),
     path("entries/<str:pk>", views.getDiaryEntry, name="entry"),
     path("entries/create", views.createDiaryEntry, name="create-diary"),

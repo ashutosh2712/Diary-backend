@@ -1,4 +1,7 @@
 from django.shortcuts import render
+from django.contrib.auth.models import User
+from django.db import IntegrityError
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import Diary
@@ -6,9 +9,38 @@ from .serializers import DiarySerializer
 
 
 # Create your views here.
+
+
+@api_view(["POST"])
+def register(request):
+    if request.method == "POST":
+        username = request.data.get("username")
+        email = request.data.get("email")
+        password = request.data.get("password")
+        confirmPassword = request.data.get("confirmPassword")
+
+        if password != confirmPassword:
+            return Response(
+                {"error": "passwords dont matech"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = User.objects.create_user(
+                username=username, email=email, password=password
+            )
+        except IntegrityError:
+            return Response(
+                {"error": "User Already exists!"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(
+            {"success": "User created successfully"}, status=status.HTTP_201_CREATED
+        )
+
+
 @api_view(["GET"])
 def getRoutes(request):
-    return Response("Wellcome to Backend dor Diary App!")
+    return Response("Wellcome to Backend Of Diary App!")
 
 
 @api_view(["GET"])
