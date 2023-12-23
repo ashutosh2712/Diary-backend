@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from rest_framework import status
@@ -36,6 +37,26 @@ def register(request):
         return Response(
             {"success": "User created successfully"}, status=status.HTTP_201_CREATED
         )
+
+
+@api_view(["POST"])
+def loginUser(request):
+    if request.method == "POST":
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return Response(
+                {"success": "user loged in successfully!"}, status=status.HTTP_200_OK
+            )
+
+        else:
+            return Response(
+                {"error": "Invalid credintial"}, status=status.HTTP_401_UNAUTHORIZED
+            )
 
 
 @api_view(["GET"])
