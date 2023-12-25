@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import Diary
@@ -22,7 +23,7 @@ def registerUser(request):
 
         if password != confirmPassword:
             return Response(
-                {"error": "passwords dont matech"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "*Passwords don't match"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
@@ -31,11 +32,11 @@ def registerUser(request):
             )
         except IntegrityError:
             return Response(
-                {"error": "User Already exists!"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "*User Already exists!"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         return Response(
-            {"success": "User created successfully"}, status=status.HTTP_201_CREATED
+            {"success": "*User created successfully"}, status=status.HTTP_201_CREATED
         )
 
 
@@ -48,14 +49,16 @@ def loginUser(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
+            token, created = Token.objects.get_or_create(user=user)
             login(request, user)
             return Response(
-                {"success": "user loged in successfully!"}, status=status.HTTP_200_OK
+                {"token": token.key, "success": "*User loged in successfully!"},
+                status=status.HTTP_200_OK,
             )
 
         else:
             return Response(
-                {"error": "Invalid credintial"}, status=status.HTTP_401_UNAUTHORIZED
+                {"error": "*Invalid credential"}, status=status.HTTP_401_UNAUTHORIZED
             )
 
 
@@ -65,7 +68,7 @@ def logoutUser(request):
         logout(request)
 
     return Response(
-        {"success": "user logged out successfully"}, status=status.HTTP_200_OK
+        {"success": "*User logged out successfully"}, status=status.HTTP_200_OK
     )
 
 
@@ -78,6 +81,7 @@ def getRoutes(request):
 def getDiaryEntries(request):
     diaryEntries = Diary.objects.all()
     serializer = DiarySerializer(diaryEntries, many=True)
+    print(serializer.data)
     return Response(serializer.data)
 
 
