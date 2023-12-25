@@ -80,7 +80,7 @@ def getRoutes(request):
 @api_view(["GET"])
 def getDiaryEntries(request):
     user = request.user
-    diaryEntries = Diary.objects.filter(user=user.id)
+    diaryEntries = Diary.objects.filter(user=user.id).order_by("-updated")
     serializer = DiarySerializer(diaryEntries, many=True)
     return Response({"entries": serializer.data, "user": user.id})
 
