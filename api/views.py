@@ -79,10 +79,11 @@ def getRoutes(request):
 
 @api_view(["GET"])
 def getDiaryEntries(request):
-    diaryEntries = Diary.objects.all()
+    user = request.user
+    print(user)
+    diaryEntries = Diary.objects.filter(user=user.id)
     serializer = DiarySerializer(diaryEntries, many=True)
-    print(serializer.data)
-    return Response(serializer.data)
+    return Response({"entries": serializer.data, "user": user.id})
 
 
 @api_view(["GET"])
